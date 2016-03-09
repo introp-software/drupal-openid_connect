@@ -37,48 +37,6 @@ class OpenIDConnectClientMicrosoft extends OpenIDConnectClientBase {
   }
 
   /**
-   * Overrides OpenIDConnectClientBase::authorize().
-   */
-  public function authorize($scope = 'openid email') {
-    $redirect_uri = Url::fromRoute(
-      'openid_connect.redirect_controller_redirect',
-      array('client_name' => $this->pluginId), array('absolute' => TRUE)
-    )->toString();
-
-    $url_options = array(
-      'query' => array(
-        'client_id' => $this->configuration['client_id'],
-        'response_type' => 'code',
-        'scope' => $scope,
-        'redirect_uri' => $redirect_uri,
-        'state' => StateToken::create(),
-      ),
-    );
-
-    $endpoints = $this->getEndpoints();
-    // Clear _GET['destination'] because we need to override it.
-    $this->requestStack->getCurrentRequest()->query->remove('destination');
-    $authorization_endpoint = Url::fromUri($endpoints['authorization'], $url_options)->toString();
-
-      $variables = array(
-        '@message' => 'authorize',
-        '@data' => json_encode($authorization_endpoint),
-      );
-      $this->loggerFactory->get('openid_connect_' . $this->pluginId)
-        ->debug('@message. Details: @data', $variables);
-
-    $response = new TrustedRedirectResponse($authorization_endpoint);
-      $variables = array(
-        '@message' => 'authorize response',
-        '@data' => json_encode($response),
-      );
-      $this->loggerFactory->get('openid_connect_' . $this->pluginId)
-        ->debug('@message. Details: @data', $variables);
-
-    return $response;
-  }
-
-  /**
    * Overrides OpenIDConnectClientBase::retrieveUserInfo().
    */
   public function retrieveUserInfo($access_token) {
